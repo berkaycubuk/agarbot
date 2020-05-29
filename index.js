@@ -1,3 +1,4 @@
+// Imports
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const {installMouseHelper} = require('./mouseHelper');
@@ -65,7 +66,7 @@ const colorThief = new ColorThief();
 
 function takeScreenshot(page) {
   page.screenshot({
-    path: "./image.png",
+    path: "./shots/image.png",
     type: "png",
     clip: {
       x: 342,
@@ -78,7 +79,7 @@ function takeScreenshot(page) {
 
 function fullShot(page, name) {
   page.screenshot({
-    path: "./" + name + ".png",
+    path: "./shots/" + name + ".png",
     type: "png",
   });
 }
@@ -91,7 +92,7 @@ function isSameShot(image1, image2) {
 
 function scoreShot(page) {
   page.screenshot({
-    path: "./score.png",
+    path: "./shots/score.png",
     type: "png",
     clip: {
       x: 0,
@@ -112,7 +113,7 @@ async function main(page) {
 
     await sleep(400);
 
-    imageToSlices('./shot1.png', [300], [400], {
+    imageToSlices('./shots/shot1.png', [300], [400], {
         saveToDir: './',
         clipperOptions: {
             canvas: require('canvas')
@@ -128,7 +129,7 @@ async function main(page) {
     var state3 = false;
     var state4 = false;
 
-    var image1 = fs.readFileSync('./section-1.png');
+    var image1 = fs.readFileSync('./shots/section-1.png');
     var rgb1 = colorThief.getColor(image1);
 
     if(rgb1[0] > 240 && rgb1[1] > 240  && rgb1[2] > 240 ) {
@@ -137,7 +138,7 @@ async function main(page) {
       state1 = false;
     }
 
-    var image2 = fs.readFileSync('./section-2.png');
+    var image2 = fs.readFileSync('./shots/section-2.png');
     var rgb2 = colorThief.getColor(image2);
 
     if(rgb2[0] > 240 && rgb2[1] > 240  && rgb2[2] > 240 ) {
@@ -146,7 +147,7 @@ async function main(page) {
       state2 = false;
     }
 
-    var image3 = fs.readFileSync('./section-3.png');
+    var image3 = fs.readFileSync('./shots/section-3.png');
     var rgb3 = colorThief.getColor(image3);
 
     if(rgb3[0] > 240 && rgb3[1] > 240  && rgb3[2] > 240 ) {
@@ -155,7 +156,7 @@ async function main(page) {
       state3 = false;
     }
 
-    var image4 = fs.readFileSync('./section-4.png');
+    var image4 = fs.readFileSync('./shots/section-4.png');
     var rgb4 = colorThief.getColor(image4);
 
     if(rgb4[0] > 240 && rgb4[1] > 240  && rgb4[2] > 240 ) {
@@ -205,7 +206,7 @@ async function main(page) {
 async function isDied(page) {
   takeScreenshot(page);
   await sleep(1000);
-  var image = fs.readFileSync('./image.png');
+  var image = fs.readFileSync('./shots/image.png');
   var rgb = colorThief.getColor(image);
   rgbR = rgb[0];
   rgbG = rgb[1];

@@ -1,13 +1,13 @@
 {
   "name": "agarbot",
-  "version": "1.0.0",
-  "description": "simple bot",
+  "version": "0.1.0",
+  "description": "Simple bot for agar.io",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Berkay Çubuk",
   "license": "ISC",
   "dependencies": {
     "canvas": "^2.6.1",
