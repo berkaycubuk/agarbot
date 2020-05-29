@@ -1,4 +1,4 @@
-// Imports
+// imports
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const {installMouseHelper} = require('./mouseHelper');
@@ -8,7 +8,10 @@ const readline = require('readline').createInterface({
   output: process.stdout
 });
 const looksSame = require('looks-same');
-var imageToSlices = require('image-to-slices');
+const imageToSlices = require('image-to-slices');
+
+// local imports
+const shot = require('./functions/shot');
 
 // settings and configs
 var username = 'agarbot_0.1';
@@ -64,7 +67,7 @@ const colorThief = new ColorThief();
   //await browser.close();
 })();
 
-function takeScreenshot(page) {
+/* function takeScreenshot(page) {
   page.screenshot({
     path: "./shots/image.png",
     type: "png",
@@ -82,7 +85,7 @@ function fullShot(page, name) {
     path: "./shots/" + name + ".png",
     type: "png",
   });
-}
+} */
 
 function isSameShot(image1, image2) {
   looksSame(image1, image2, (err, {equal}) => {
@@ -109,7 +112,7 @@ async function main(page) {
     //page.mouse.move(400, 300);
 
     // take screenshot
-    fullShot(page, 'shot1');
+    shot.takeScreenshot(page, 'shot1');
 
     await sleep(400);
 
@@ -229,24 +232,6 @@ async function isDied(page) {
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
-}
-
-function move(page, x, y) {
-  //
-}
-
-function loop(page) {
-  page.mouse.move(500, 300);
-  sleep(5000);
-  page.mouse.move(400, 500);
-}
-
-function feed(page) {
-  page.keyboard.press('W');
-}
-
-function split(page) {
-  page.keyboard.press('Space');
 }
 
 function waitForCommand(page) {
