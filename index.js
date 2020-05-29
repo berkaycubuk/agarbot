@@ -7,14 +7,14 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 });
-const looksSame = require('looks-same');
-const imageToSlices = require('image-to-slices');
+//const imageToSlices = require('image-to-slices');
+const cv = require('opencv4nodejs');
 
 // local imports
-const shot = require('./functions/shot');
+const core = require('./functions/core');
 
 // settings and configs
-var username = 'agarbot_0.1';
+var username = 'agarbot_0.1.1';
 var mouseX = 400;
 var mouseY = 300;
 var currentX = 0;
@@ -29,7 +29,7 @@ const colorThief = new ColorThief();
 // puppeteer
 (async () => {
   // const browser = await puppeteer.launch({ headless: false }); // chromium
-  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/3cf21cd5-0a17-4ab3-a86e-7dafe33e1c83'; // chrome
+  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/69baaa09-1e2a-4585-859c-4443e3166ab9'; // chrome
   const browser = await puppeteer.connect({
     browserWSEndpoint: wsChromeEndpointurl,
   });
@@ -42,29 +42,12 @@ const colorThief = new ColorThief();
     waitUntil: 'networkidle0'
   });
 
-  await sleep(5000);
-
-  // clean input
-  await page.keyboard.down('Control');
-  await page.keyboard.press('A');
-  await page.keyboard.up('Control');
-  await page.keyboard.press('Backspace');
-
-  // type username
-  await page.keyboard.type(username, { delay: 100 });
-
-  await sleep(1000);
-
-  await page.keyboard.press('Enter');
-
-  await sleep(1000);  
+  // wait to load it properly
+  await core.sleep(5000);
 
   main(page);
 
-  // waitForCommand(page);
-  
-
-  //await browser.close();
+  //await browser.close(); // close the browser
 })();
 
 /* function takeScreenshot(page) {
@@ -87,12 +70,6 @@ function fullShot(page, name) {
   });
 } */
 
-function isSameShot(image1, image2) {
-  looksSame(image1, image2, (err, {equal}) => {
-    return equal;
-  });
-}
-
 function scoreShot(page) {
   page.screenshot({
     path: "./shots/score.png",
@@ -107,14 +84,60 @@ function scoreShot(page) {
 }
 
 async function main(page) {
+  console.log("✅ Main started");
+  // clean input
+  page.keyboard.down('Control');
+  page.keyboard.press('A');
+  page.keyboard.up('Control');
+  page.keyboard.press('Backspace');
+
+  // type username
+  page.keyboard.type(username, { delay: 50 });
+  await core.sleep(1000);
+  page.keyboard.press('Enter');
+
+  console.log("✅ You joined");
+  await core.sleep(1000);
+
+  // main loop
   while(1) {
     // stop
     //page.mouse.move(400, 300);
 
     // take screenshot
-    shot.takeScreenshot(page, 'shot1');
+    core.takeScreenshot(page, 'fullscreen');
 
-    await sleep(400);
+    await core.sleep(100);
+
+    var screen = cv.imread('./shots/fullscreen.png');
+
+    var gray = screen.gaussianBlur(new cv.Size(5, 5), 1.2);
+    gray = gray.cvtColor(cv.COLOR_BGR2GRAY);
+
+    var thresh = gray.threshold(0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU);
+
+    var contours = thresh.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE, new cv.Point2(0, 0));
+
+    contours = contours.sort((c0, c1) => c1.area - c0.area);
+    /*const imgContours = contours.map((contour) => {
+      if(contour.area < 250) {
+        return contour.getPoints();
+      }
+    });*/
+
+    for(const cnt of contours) {
+      if(cnt.area < 250) {
+        var cntArray = cnt.getPoints();
+        var moveX = cntArray[0].x;
+        var moveY = cntArray[0].y;
+        break;
+      }
+    }
+
+    
+    /* core.takeScreenshot(page, 'shot1');
+
+    await core.sleep(400);
 
     imageToSlices('./shots/shot1.png', [300], [400], {
         saveToDir: './',
@@ -197,19 +220,19 @@ async function main(page) {
     } else {
       page.mouse.move(getRandomInt(800), getRandomInt(600));
       console.log("random");
-    }
+    } */
 
-    //page.mouse.move(getRandomInt(800), getRandomInt(600));
-    await sleep(500);
-    isDied(page);
-    await sleep(500);
+    page.mouse.move(moveX, moveY);
+    await core.sleep(100);
+    await isDied(page);
+    await core.sleep(100);
   }
 }
 
 async function isDied(page) {
-  takeScreenshot(page);
-  await sleep(1000);
-  var image = fs.readFileSync('./shots/image.png');
+  core.takeBallScreenshot(page, 'ball');
+  await core.sleep(1000);
+  var image = fs.readFileSync('./shots/ball.png');
   var rgb = colorThief.getColor(image);
   rgbR = rgb[0];
   rgbG = rgb[1];
@@ -217,16 +240,17 @@ async function isDied(page) {
   // console.log("R: " + rgbR + " G: " + rgbG + " B: " + rgbB);
 
   if(rgbR == 244 && rgbG == 4 && rgbB == 44) {
-    console.log("You Died!");
+    console.log("☠️ You Died!");
 
     // restart
     page.mouse.move(400, 235);
     page.mouse.down();
     page.mouse.up();
-    await sleep(3000);
-    await page.mouse.move(400, 190);
-    await page.mouse.down();
-    await page.mouse.up();
+    await core.sleep(3000);
+    page.mouse.move(400, 190);
+    page.mouse.down();
+    page.mouse.up();
+    console.log("✅ You rejoined");
   }
 }
 
@@ -239,11 +263,5 @@ function waitForCommand(page) {
     console.log("Ok, starting...");
     isDied(page);
     readline.close();
-  });
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
   });
 }
