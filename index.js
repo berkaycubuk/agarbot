@@ -29,7 +29,7 @@ const colorThief = new ColorThief();
 // puppeteer
 (async () => {
   // const browser = await puppeteer.launch({ headless: false }); // chromium
-  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/69baaa09-1e2a-4585-859c-4443e3166ab9'; // chrome
+  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/cb285c05-6062-434b-8dbc-6ac0927148f9'; // chrome
   const browser = await puppeteer.connect({
     browserWSEndpoint: wsChromeEndpointurl,
   });
@@ -126,11 +126,24 @@ async function main(page) {
     });*/
 
     for(const cnt of contours) {
-      if(cnt.area < 250) {
+      if(cnt.area > 500 && cnt.area < 1800) {
+        var enmyArray = cnt.getPoints();
+        var enmyX = enmyArray[0].x;
+        var enmyY = enmyArray[0].y;
+      }
+      if(cnt.area < 230) {
         var cntArray = cnt.getPoints();
         var moveX = cntArray[0].x;
         var moveY = cntArray[0].y;
-        break;
+        var difX = enmyX - moveX;
+        var difY = enmyY - moveY;
+        var plyEnmyDifX = enmyX - 400;
+        var plyEnmyDifY = enmyY - 300;
+        if(Math.pow(difX, 2) > Math.pow(150, 2) && Math.pow(difY, 2) > Math.pow(150, 2)) {
+          if(Math.pow(plyEnmyDifX, 2) > Math.pow(150, 2) && Math.pow(plyEnmyDifY, 2) > Math.pow(150, 2)) {
+            break;
+          }
+        }
       }
     }
 
@@ -231,7 +244,7 @@ async function main(page) {
 
 async function isDied(page) {
   core.takeBallScreenshot(page, 'ball');
-  await core.sleep(1000);
+  await core.sleep(500);
   var image = fs.readFileSync('./shots/ball.png');
   var rgb = colorThief.getColor(image);
   rgbR = rgb[0];

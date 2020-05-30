@@ -15,8 +15,8 @@ async function installMouseHelper(page) {
           top: 0;
           z-index: 10000;
           left: 0;
-          width: 20px;
-          height: 20px;
+          width: 5px;
+          height: 5px;
           background: rgba(0,0,0,.4);
           border: 1px solid white;
           border-radius: 10px;

@@ -28,21 +28,23 @@ const cv = require('opencv4nodejs');
   var contours = thresh.findContours(cv.RETR_TREE, cv.CHAIN_APPROX_NONE, new cv.Point2(0, 0));
 
   contours = contours.sort((c0, c1) => c1.area - c0.area);
-  /*const imgContours = contours.map((contour) => {
-    if(contour.area < 250) {
+  const imgContours = contours.map((contour) => {
+    //if(contour.area < 250) {
       //console.log(contour);
       return contour.getPoints();
-    } else {
-      var falseContour = new cv.Point2(0, 0);
-      return falseContour;
-    }
+    //} else {
+     // var falseContour = new cv.Point2(0, 0);
+     // return falseContour;
+    //}
   });
+
+  console.log(contours);
 
   //img.drawRectangle(centerPoint, centerPoint, new cv.Vec3(0, 0, 0), 5);
   // img.drawLine(centerPoint, imgContours[4][2], new cv.Vec3(0, 0, 0), 2); // distance
-  img.drawContours(imgContours, -1, new cv.Vec3(41, 176, 218), 1);*/
+  //img.drawContours(imgContours, -1, new cv.Vec3(41, 176, 218), 3);
 
-  for(const cnt of contours) {
+  /*for(const cnt of contours) {
     if(cnt.area < 250) {
       var cntArray = cnt.getPoints();
       var moveX = cntArray[0].x;
@@ -50,13 +52,13 @@ const cv = require('opencv4nodejs');
       console.log(moveX + " " + moveY);
       break;
     }
-  }
+  }*/
 
   cv.imshow('frame', img);
   
   var key = cv.waitKey(1);
   if(key == 27) {
-   //break;
+  // break;
   }
 //}
 
