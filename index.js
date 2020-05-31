@@ -29,7 +29,7 @@ const colorThief = new ColorThief();
 // puppeteer
 (async () => {
   // const browser = await puppeteer.launch({ headless: false }); // chromium
-  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/cb285c05-6062-434b-8dbc-6ac0927148f9'; // chrome
+  const wsChromeEndpointurl = 'ws://127.0.0.1:9222/devtools/browser/9ee013da-5aa8-4cdc-927f-9ff12fda7de0'; // chrome
   const browser = await puppeteer.connect({
     browserWSEndpoint: wsChromeEndpointurl,
   });
@@ -37,7 +37,7 @@ const colorThief = new ColorThief();
 
   await installMouseHelper(page);
   
-  //await page.setViewport({ width: 800, height: 600 });
+  await page.setViewport({ width: 800, height: 600 });
   await page.goto('https://agar.io', {
     waitUntil: 'networkidle0'
   });
@@ -125,13 +125,16 @@ async function main(page) {
       }
     });*/
 
+    //page.mouse.move(400, 300);
+
     for(const cnt of contours) {
-      if(cnt.area > 500 && cnt.area < 1800) {
+      // make calculations for all enemies
+      if(cnt.area > 300 && cnt.area < 2000) {
         var enmyArray = cnt.getPoints();
         var enmyX = enmyArray[0].x;
         var enmyY = enmyArray[0].y;
       }
-      if(cnt.area < 230) {
+      if(cnt.area < 200) {
         var cntArray = cnt.getPoints();
         var moveX = cntArray[0].x;
         var moveY = cntArray[0].y;
@@ -139,106 +142,42 @@ async function main(page) {
         var difY = enmyY - moveY;
         var plyEnmyDifX = enmyX - 400;
         var plyEnmyDifY = enmyY - 300;
-        if(Math.pow(difX, 2) > Math.pow(150, 2) && Math.pow(difY, 2) > Math.pow(150, 2)) {
-          if(Math.pow(plyEnmyDifX, 2) > Math.pow(150, 2) && Math.pow(plyEnmyDifY, 2) > Math.pow(150, 2)) {
+        if(Math.pow(difX, 2) > Math.pow(300, 2) || Math.pow(difY, 2) > Math.pow(300, 2)) {
+          if(Math.pow(plyEnmyDifX, 2) > Math.pow(300, 2) || Math.pow(plyEnmyDifY, 2) > Math.pow(300, 2)) {
             break;
+          } else {
+            moveX = 345;
+            moveY = 245;
+            if(plyEnmyDifX < 0 && plyEnmyDifY < 0) { // plus or minus
+              moveX = 400 - plyEnmyDifX;
+              moveY = 300 - plyEnmyDifY;
+            } else {
+              moveX = 400 + plyEnmyDifX;
+              moveY = 300 + plyEnmyDifY;
+            }
           }
+        } else {
+          moveX = 345;
+          moveY = 245;
+          if(difX < 0 && difY < 0) { // plus or minus
+            moveX = 400 - difX;
+            moveY = 300 - difY;
+          } else {
+            moveX = 400 + difX;
+            moveY = 300 + difY;
+          } 
         }
       }
     }
 
-    
-    /* core.takeScreenshot(page, 'shot1');
-
-    await core.sleep(400);
-
-    imageToSlices('./shots/shot1.png', [300], [400], {
-        saveToDir: './',
-        clipperOptions: {
-            canvas: require('canvas')
-        }    
-    }, function() {
-        
-    }); 
-
-    await sleep(200);
-
-    var state1 = false;
-    var state2 = false;
-    var state3 = false;
-    var state4 = false;
-
-    var image1 = fs.readFileSync('./shots/section-1.png');
-    var rgb1 = colorThief.getColor(image1);
-
-    if(rgb1[0] > 240 && rgb1[1] > 240  && rgb1[2] > 240 ) {
-      state1 = true;
-    } else {
-      state1 = false;
-    }
-
-    var image2 = fs.readFileSync('./shots/section-2.png');
-    var rgb2 = colorThief.getColor(image2);
-
-    if(rgb2[0] > 240 && rgb2[1] > 240  && rgb2[2] > 240 ) {
-      state2 = true;
-    } else {
-      state2 = false;
-    }
-
-    var image3 = fs.readFileSync('./shots/section-3.png');
-    var rgb3 = colorThief.getColor(image3);
-
-    if(rgb3[0] > 240 && rgb3[1] > 240  && rgb3[2] > 240 ) {
-      state3 = true;
-    } else {
-      state3 = false;
-    }
-
-    var image4 = fs.readFileSync('./shots/section-4.png');
-    var rgb4 = colorThief.getColor(image4);
-
-    if(rgb4[0] > 240 && rgb4[1] > 240  && rgb4[2] > 240 ) {
-      state4 = true;
-    } else {
-      state4 = false;
-    }
-
-    await sleep(500);
-
-    if(state1 && state2 && !state3 && !state4) { // up
-      page.mouse.move(400, 0);
-      console.log("up");
-    } else if(state1 && state3 && !state2 && !state4) { // left
-      page.mouse.move(0, 300);
-      console.log("left");
-    } else if(state2 && state4 && !state3 && !state1) { // right
-      page.mouse.move(800, 300);
-      console.log("right");
-    } else if(state2 && state4 && !state3 && !state1) { // bottom
-      page.mouse.move(400, 600);
-      console.log("bottom");
-    } else if(state1) {
-      page.mouse.move(0, 0);
-      console.log("top left");
-    } else if(state2) {
-      page.mouse.move(800, 0);
-      console.log("top right");
-    } else if(state3) {
-      page.mouse.move(0, 600);
-      console.log("bottom left");
-    } else if(state4) {
-      page.mouse.move(800, 600);
-      console.log("bottom right");
-    } else {
-      page.mouse.move(getRandomInt(800), getRandomInt(600));
-      console.log("random");
-    } */
+    console.log("DifX: " + difX + " DifY: " + difY);
+    console.log("MoveX: " + moveX + " MoveY: " + moveY);
 
     page.mouse.move(moveX, moveY);
-    await core.sleep(100);
+
+    await core.sleep(200);
     await isDied(page);
-    await core.sleep(100);
+    await core.sleep(200);
   }
 }
 

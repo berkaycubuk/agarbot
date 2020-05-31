@@ -32,9 +32,6 @@ const cv = require('opencv4nodejs');
     //if(contour.area < 250) {
       //console.log(contour);
       return contour.getPoints();
-    //} else {
-     // var falseContour = new cv.Point2(0, 0);
-     // return falseContour;
     //}
   });
 
